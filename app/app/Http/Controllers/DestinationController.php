@@ -2,63 +2,58 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Destination;
-use App\Models\Itineraires;
 use Illuminate\Http\Request;
+use App\Models\Destination;
+use App\Models\Itinerary;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\ValidationException;
 
 class DestinationController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Ajouter une destination à un itinéraire
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function index()
+    public function store(Request $request)
     {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request , $itinerary_id)
-    {
+        // Validation des données
         $request->validate([
-          'name' => 'required',
-          'accommodation' => 'required',
-          'places_to_visit' => 'required',
-          'activities' => 'required',
-          'dishes_to_try' => 'required'
+            'itinerary_id' => 'required|exists:itineraries,id',
+            'name' => 'required|string|max:255',
+            'accommodation' => 'required|string|max:255',
+            'places_to_visit' => 'nullable|array',
+            'activities' => 'nullable|array',
+            'dishes_to_try' => 'nullable|array',
         ]);
-        $createDestination = Destination::create([
-          'itinerary_id'  => $itinerary_id,
-          'name'          => $request->name,
-          'accommodation'          => $request->accommodation,
-          'places_to_visit'          => $request->places_to_visit,
-          'activities'          => $request->activities,
-          'dishes_to_try'          => $request->dishes_to_try,
+
+        // Vérifier que l'itinéraire appartient à l'utilisateur connecté
+        $itinerary = Itinerary::where('user_id', Auth::id())
+            ->findOrFail($request->itinerary_id);
+
+        // Créer la destination
+        $destination = Destination::create([
+            'itinerary_id' => $itinerary->id,
+            'name' => $request->name,
+            'accommodation' => $request->accommodation,
+            'places_to_visit' => $request->places_to_visit ?? [],
+            'activities' => $request->activities ?? [],
+            'dishes_to_try' => $request->dishes_to_try ?? [],
         ]);
-        if($createDestination){
-            return response()->json([
-              'message' => "created"
-            ]);
-        }else{
-            return  response()->json([
-              'message' => "not created"
-            ]);
-        }
-    }
 
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
+        return response()->json([
+            'message' => 'Destination added successfully',
+            'destination' => $destination,
+        ], 201);
     }
 
     /**
-     * Update the specified resource in storage.
+     * Modifier une destination existante
+     *
+     * @param Request $request
+     * @param int $id
+     * @return \Illuminate\Http\JsonResponse
      */
     public function update(Request $request, $id)
     {
@@ -75,7 +70,7 @@ class DestinationController extends Controller
         $destination = Destination::findOrFail($id);
 
         // Vérifier que l'itinéraire associé appartient à l'utilisateur connecté
-        $itinerary = Itineraires::where('user_id', Auth::id())
+        $itinerary = Itinerary::where('user_id', Auth::id())
             ->findOrFail($destination->itinerary_id);
 
         // Mettre à jour la destination
@@ -90,7 +85,10 @@ class DestinationController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Supprimer une destination
+     *
+     * @param int $id
+     * @return \Illuminate\Http\JsonResponse
      */
     public function destroy($id)
     {
@@ -98,7 +96,7 @@ class DestinationController extends Controller
         $destination = Destination::findOrFail($id);
 
         // Vérifier que l'itinéraire associé appartient à l'utilisateur connecté
-        $itinerary = Itineraires::where('user_id', Auth::id())
+        $itinerary = Itinerary::where('user_id', Auth::id())
             ->findOrFail($destination->itinerary_id);
 
         // Supprimer la destination

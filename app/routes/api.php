@@ -12,22 +12,10 @@ use App\Http\Controllers\DestinationController;
 |--------------------------------------------------------------------------
 |
 | Here is where you can register API routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "api" middleware group. Make something great!
+| routes are loaded by the RouteServiceProvider within a group which
+| is assigned the "api" middleware group. Enjoy building your API!
 |
 */
-
-// Route::get('/itineraires', function(){
-//   return 'itineraires';
-// });
-
-// Route::post('/itineraires', function(){
-
-// });
-
-// Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-//     return $request->user();
-// });
 
 // Authentification
 Route::post('/register', [AuthController::class, 'register']);
@@ -39,38 +27,43 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
 
     // Gestion des itinéraires
-    Route::prefix('itineraires')->group(function () {
-      // Créer un nouvel itinéraire
-      Route::post('/add', [ItineraryController::class, 'store']);
+    Route::prefix('itineraries')->group(function () {
+        // Créer un nouvel itinéraire
+        Route::post('/', [ItineraryController::class, 'store']);
 
-      // Modifier un itinéraire
-      Route::put('/{id}', [ItineraryController::class, 'update']);
+        // Modifier un itinéraire
+        Route::put('/{id}', [ItineraryController::class, 'update']);
 
-      // Ajouter un itinéraire à la "liste à visiter"
-      Route::post('/{id}/wishlist', [ItineraryController::class, 'addToWishlist']);
+        // Ajouter un itinéraire à la "liste à visiter"
+        Route::post('/{id}/wishlist', [ItineraryController::class, 'addToWishlist']);
 
-      // Rechercher et filtrer les itinéraires
-      Route::get('/search', [ItineraryController::class, 'search']);
+        // Rechercher et filtrer les itinéraires
+        Route::get('/search', [ItineraryController::class, 'search']);
 
-      // Récupérer tous les itinéraires avec leurs destinations
-      Route::get('/', [ItineraryController::class, 'index']);
+        // Récupérer tous les itinéraires avec leurs destinations
+        Route::get('/', [ItineraryController::class, 'index']);
 
-      // Récupérer les itinéraires les plus populaires
-      Route::get('/popular', [ItineraryController::class, 'popular']);
+        // Récupérer les itinéraires les plus populaires
+        Route::get('/popular', [ItineraryController::class, 'popular']);
 
-      // Statistiques : Nombre total d'itinéraires par catégorie
-      Route::get('/stats', [ItineraryController::class, 'stats']);
-  });
+        // Statistiques : Nombre total d'itinéraires par catégorie
+        Route::get('/stats', [ItineraryController::class, 'stats']);
+    });
 
-  // Gestion des destinations
-  Route::prefix('destinations')->group(function () {
-    // Ajouter une destination à un itinéraire
-    Route::post('/add/{id}', [DestinationController::class, 'store']);
+    // Gestion des destinations
+    Route::prefix('destinations')->group(function () {
+        // Ajouter une destination à un itinéraire
+        Route::post('/', [DestinationController::class, 'store']);
 
-    // Modifier une destination
-    Route::put('/update/{id}', [DestinationController::class, 'update']);
+        // Modifier une destination
+        Route::put('/{id}', [DestinationController::class, 'update']);
 
-    // Supprimer une destination
-    Route::delete('/delete/{id}', [DestinationController::class, 'destroy']);
+        // Supprimer une destination
+        Route::delete('/{id}', [DestinationController::class, 'destroy']);
+    });
 });
+
+// Route pour tester l'API (facultatif)
+Route::get('/test', function () {
+    return response()->json(['message' => 'API is working!']);
 });

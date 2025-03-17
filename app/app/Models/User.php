@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -42,4 +42,13 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
+
+    /**
+     * Get the itineraries added to the user's wishlist.
+     */
+    public function wishlist()
+    {
+        return $this->belongsToMany(Itinerary::class, 'wishlist', 'user_id', 'itinerary_id')
+            ->withTimestamps(); // Optional: Add timestamps to the pivot table
+    }
 }
